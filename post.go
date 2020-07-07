@@ -38,19 +38,20 @@ func writeTomlHugoHeader(entry *Entry) string {
 	return buff.String()
 }
 
+// WriteHugoPost writes an entry to a file for hugo
 func WriteHugoPost(entry *Entry) (string, string) {
 	var buff bytes.Buffer
 
 	buff.WriteString(writeTomlHugoHeader(entry))
 
-	if len(entry.In_reply_to) > 0 {
-		buff.WriteString("↪️ replying to: " + entry.In_reply_to + "\n")
+	if len(entry.InReplyTo) > 0 {
+		buff.WriteString("↪️ replying to: " + entry.InReplyTo + "\n")
 	}
-	if len(entry.Like_of) > 0 {
-		buff.WriteString("👍: " + entry.Like_of + "\n")
+	if len(entry.LikeOf) > 0 {
+		buff.WriteString("👍: " + entry.LikeOf + "\n")
 	}
-	if len(entry.Repost_of) > 0 {
-		buff.WriteString("🔁 repost of: " + entry.Repost_of + "\n")
+	if len(entry.RepostOf) > 0 {
+		buff.WriteString("🔁 repost of: " + entry.RepostOf + "\n")
 	}
 	if len(entry.Content) > 0 {
 		buff.WriteString(entry.Content + "\n")

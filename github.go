@@ -17,6 +17,7 @@ var authorEmail = "cole@colelyman.com"
 var sourceRepo = "colelyman-hugo"
 var branch = "master"
 
+// CommitEntry commits the entry to git
 func CommitEntry(path string, file string) error {
 	client := connectGitHub()
 	repo := getRef(client)
@@ -53,7 +54,7 @@ func getRef(client *github.Client) *github.Reference {
 
 // this function adds the new file to the repo
 func getTree(path string, file string, client *github.Client, ref *github.Reference) (*github.Tree, error) {
-	tree, _, err := client.Git.CreateTree(ctx, sourceOwner, sourceRepo, *ref.Object.SHA, []github.TreeEntry{github.TreeEntry{Path: github.String(path), Type: github.String("blob"), Content: github.String(file), Mode: github.String(("100644"))}})
+	tree, _, err := client.Git.CreateTree(ctx, sourceOwner, sourceRepo, *ref.Object.SHA, []github.TreeEntry{{Path: github.String(path), Type: github.String("blob"), Content: github.String(file), Mode: github.String(("100644"))}})
 
 	return tree, err
 }

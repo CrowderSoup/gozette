@@ -53,18 +53,18 @@ func handler(req events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse
 				StatusCode: 400,
 				Body:       "There was an error committing the entry to the repository",
 			}, errors.New("Error committing the entry to the repository")
-		} else {
-			return &events.APIGatewayProxyResponse{
-				StatusCode: 202,
-				Headers:    map[string]string{"Location": location},
-			}, nil
 		}
-	} else {
+
 		return &events.APIGatewayProxyResponse{
-			StatusCode: 403,
-			Body:       "Forbidden, there was a problem with the provided access token",
-		}, errors.New("The provided access token does not grant permission")
+			StatusCode: 202,
+			Headers:    map[string]string{"Location": location},
+		}, nil
 	}
+
+	return &events.APIGatewayProxyResponse{
+		StatusCode: 403,
+		Body:       "Forbidden, there was a problem with the provided access token",
+	}, errors.New("The provided access token does not grant permission")
 }
 
 func main() {

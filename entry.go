@@ -10,31 +10,38 @@ import (
 	hashids "github.com/speps/go-hashids"
 )
 
+// PostType represents what kind of post we're creating
 type PostType int
 
 const (
+	// EntryPost a post that's an Entry
 	EntryPost PostType = iota + 1
+	// CardPost a post that's a card
 	CardPost
+	// EventPost a post that's an event
 	EventPost
+	//CitePost a post that's a citation
 	CitePost
 )
 
+// Entry represents the post, not to be confused with the PostType of Entry
 type Entry struct {
-	Content     string   `json:"content"`
-	Name        string   `json:"name"`
-	Categories  []string `json:"category"`
-	Type        PostType `json:"type"`
-	Slug        string   `json:"mp-slug"`
-	Summary     string   `json:"summary"`
-	In_reply_to string   `json:"in-reply-to"`
-	Like_of     string   `json:"like-of"`
-	Repost_of   string   `json:"repost-of"`
-	hash        string
-	token       string
+	Content    string   `json:"content"`
+	Name       string   `json:"name"`
+	Categories []string `json:"category"`
+	Type       PostType `json:"type"`
+	Slug       string   `json:"mp-slug"`
+	Summary    string   `json:"summary"`
+	InReplyTo  string   `json:"in-reply-to"`
+	LikeOf     string   `json:"like-of"`
+	RepostOf   string   `json:"repost-of"`
+	hash       string
+	token      string
 }
 
+// CreateEntry creates the entry based on the content type and request body
 func CreateEntry(contentType ContentType, body string) (*Entry, error) {
-	if contentType == WWW_FORM {
+	if contentType == WwwForm {
 		bodyValues, err := url.ParseQuery(body)
 		if err != nil {
 			return nil, err
@@ -44,7 +51,7 @@ func CreateEntry(contentType ContentType, body string) (*Entry, error) {
 		entry := new(Entry)
 		err := json.Unmarshal([]byte(body), entry)
 		return entry, err
-	} else if contentType == MULTIPART {
+	} else if contentType == MultiPart {
 		fmt.Println("Multipart content-type was detected")
 		fmt.Printf("body is: %s\n", body)
 		return nil, errors.New("Multipart content-type not implemented yet")
@@ -77,13 +84,13 @@ func createEntryFromURLValues(bodyValues url.Values) (*Entry, error) {
 			entry.Summary = summary[0]
 		}
 		if inReplyTo, ok := bodyValues["in-reply-to"]; ok {
-			entry.In_reply_to = inReplyTo[0]
+			entry.InReplyTo = inReplyTo[0]
 		}
 		if likeOf, ok := bodyValues["like-of"]; ok {
-			entry.Like_of = likeOf[0]
+			entry.LikeOf = likeOf[0]
 		}
 		if repostOf, ok := bodyValues["repost-of"]; ok {
-			entry.Repost_of = repostOf[0]
+			entry.RepostOf = repostOf[0]
 		}
 		if token, ok := bodyValues["access_token"]; ok {
 			entry.token = "Bearer " + token[0]
@@ -95,6 +102,7 @@ func createEntryFromURLValues(bodyValues url.Values) (*Entry, error) {
 		errors.New("Error parsing the entry from URL Values")
 }
 
+// WriteEntry writes the entry
 func WriteEntry(entry *Entry) (string, error) {
 	path, file := WriteHugoPost(entry)
 	err := CommitEntry(path, file)

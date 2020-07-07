@@ -8,23 +8,32 @@ import (
 	"strings"
 )
 
+// ContentType the various content types available
 type ContentType int
 
 const (
-	WWW_FORM ContentType = iota
+	// WwwForm form content type
+	WwwForm ContentType = iota
+
+	// JSON json content type
 	JSON
-	MULTIPART
-	UNSUPPORTED_TYPE
+
+	// MultiPart multi-part form type
+	MultiPart
+
+	// UnsupportedType content type not supported
+	UnsupportedType
 )
 
 const (
-	indieAuthTokenUrl = "https://tokens.indieauth.com/token"
+	indieAuthTokenURL = "https://tokens.indieauth.com/token"
 	indieAuthMe       = "http://colelyman.com/"
 )
 
+// IndieAuthRes the auth response
 type IndieAuthRes struct {
 	Me       string `json:"me"`
-	ClientId string `json:"client_id"`
+	ClientID string `json:"client_id"`
 	Scope    string `json:"scope"`
 	Issue    int    `json:"issued_at"`
 	Nonce    int    `json:"nonce"`
@@ -37,7 +46,7 @@ func checkAccess(token string) (bool, error) {
 	}
 	// form the request to check the token
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", indieAuthTokenUrl, nil)
+	req, err := http.NewRequest("GET", indieAuthTokenURL, nil)
 	if err != nil {
 		return false,
 			errors.New("Error making the request for checking token access")
@@ -85,6 +94,7 @@ func checkAccess(token string) (bool, error) {
 	return true, nil
 }
 
+// CheckAuthorization checks that the request is authorized
 func CheckAuthorization(entry *Entry, headers map[string]string) bool {
 	token, ok := headers["authorization"]
 	if !ok && len(entry.token) == 0 { // there is no token provided
@@ -102,18 +112,19 @@ func CheckAuthorization(entry *Entry, headers map[string]string) bool {
 	}
 }
 
+// GetContentType gets the request content type
 func GetContentType(headers map[string]string) (ContentType, error) {
 	if contentType, ok := headers["content-type"]; ok {
 		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-			return WWW_FORM, nil
+			return WwwForm, nil
 		}
 		if strings.Contains(contentType, "application/json") {
 			return JSON, nil
 		}
 		if strings.Contains(contentType, "multipart/form-data") {
-			return MULTIPART, nil
+			return MultiPart, nil
 		}
-		return UNSUPPORTED_TYPE, errors.New("Content-type " + contentType + " is not supported, use application/x-www-form-urlencoded or application/json")
+		return UnsupportedType, errors.New("Content-type " + contentType + " is not supported, use application/x-www-form-urlencoded or application/json")
 	}
-	return UNSUPPORTED_TYPE, errors.New("Content-type is not provided in the request")
+	return UnsupportedType, errors.New("Content-type is not provided in the request")
 }
