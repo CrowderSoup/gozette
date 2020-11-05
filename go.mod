@@ -8,4 +8,5 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/speps/go-hashids v2.0.0+incompatible
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	github.com/koding/multiconfig v0.0.0-20171124222453-69c27309b2d7
 )

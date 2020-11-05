@@ -1,4 +1,4 @@
-package main
+package micropub
 
 import (
 	"encoding/json"
@@ -7,7 +7,8 @@ import (
 	"net/url"
 	"time"
 
-	hashids "github.com/speps/go-hashids"
+	"github.com/CrowderSoup/gozette/storage"
+	"github.com/speps/go-hashids"
 )
 
 // PostType represents what kind of post we're creating
@@ -36,7 +37,7 @@ type Entry struct {
 	LikeOf     string   `json:"like-of"`
 	RepostOf   string   `json:"repost-of"`
 	hash       string
-	token      string
+	Token      string
 }
 
 // CreateEntry creates the entry based on the content type and request body
@@ -93,7 +94,7 @@ func createEntryFromURLValues(bodyValues url.Values) (*Entry, error) {
 			entry.RepostOf = repostOf[0]
 		}
 		if token, ok := bodyValues["access_token"]; ok {
-			entry.token = "Bearer " + token[0]
+			entry.Token = "Bearer " + token[0]
 		}
 
 		return entry, nil
@@ -105,7 +106,7 @@ func createEntryFromURLValues(bodyValues url.Values) (*Entry, error) {
 // WriteEntry writes the entry
 func WriteEntry(entry *Entry) (string, error) {
 	path, file := WriteHugoPost(entry)
-	err := CommitEntry(path, file)
+	err := storage.CommitEntry(path, file)
 	if err != nil {
 		return "", err
 	}

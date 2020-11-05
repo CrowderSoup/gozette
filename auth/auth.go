@@ -1,4 +1,4 @@
-package main
+package auth
 
 import (
 	"encoding/json"
@@ -6,28 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-)
 
-// ContentType the various content types available
-type ContentType int
-
-const (
-	// WwwForm form content type
-	WwwForm ContentType = iota
-
-	// JSON json content type
-	JSON
-
-	// MultiPart multi-part form type
-	MultiPart
-
-	// UnsupportedType content type not supported
-	UnsupportedType
-)
-
-const (
-	indieAuthTokenURL = "https://tokens.indieauth.com/token"
-	indieAuthMe       = "http://colelyman.com/"
+	"github.com/CrowderSoup/gozette/config"
+	"github.com/CrowderSoup/gozette/micropub"
 )
 
 // IndieAuthRes the auth response
@@ -39,7 +20,7 @@ type IndieAuthRes struct {
 	Nonce    int    `json:"nonce"`
 }
 
-func checkAccess(token string) (bool, error) {
+func checkAccess(token, indieAuthMe, indieAuthTokenURL string) (bool, error) {
 	if token == "" {
 		return false,
 			errors.New("Token string is empty")
@@ -95,36 +76,19 @@ func checkAccess(token string) (bool, error) {
 }
 
 // CheckAuthorization checks that the request is authorized
-func CheckAuthorization(entry *Entry, headers map[string]string) bool {
+func CheckAuthorization(config *config.Config, entry *micropub.Entry, headers map[string]string) bool {
 	token, ok := headers["authorization"]
-	if !ok && len(entry.token) == 0 { // there is no token provided
+	if !ok && len(entry.Token) == 0 { // there is no token provided
 		return false
 	} else if ok {
-		entry.token = token
+		entry.Token = token
 	}
 
-	if ok, err := checkAccess(entry.token); ok {
+	if ok, err := checkAccess(entry.Token, config.IndieAuthMe, config.IndieAuthTokenURL); ok {
 		return true
 	} else if err != nil {
 		return false
 	} else {
 		return false
 	}
-}
-
-// GetContentType gets the request content type
-func GetContentType(headers map[string]string) (ContentType, error) {
-	if contentType, ok := headers["content-type"]; ok {
-		if strings.Contains(contentType, "application/x-www-form-urlencoded") {
-			return WwwForm, nil
-		}
-		if strings.Contains(contentType, "application/json") {
-			return JSON, nil
-		}
-		if strings.Contains(contentType, "multipart/form-data") {
-			return MultiPart, nil
-		}
-		return UnsupportedType, errors.New("Content-type " + contentType + " is not supported, use application/x-www-form-urlencoded or application/json")
-	}
-	return UnsupportedType, errors.New("Content-type is not provided in the request")
 }
